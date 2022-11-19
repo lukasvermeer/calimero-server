@@ -45,8 +45,8 @@ javadoc.options.encoding = 'UTF-8'
 mainClassName = 'tuwien.auto.calimero.server.Launcher'
 
 run {
-    // for passing program arguments, use -Dexec.args="..."
-    args System.getProperty("exec.args", "").split() 
+	// allows to pass -Djava.util.logging.config.file=resources/logging.properties
+	systemProperties System.properties
     standardInput = System.in
 }
 
@@ -89,10 +89,9 @@ dependencies {
     api "com.github.calimero:calimero-core:${version}"
     api "com.github.calimero:calimero-device:${version}"
 
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
-
     runtimeOnly "com.github.calimero:calimero-rxtx:${version}"
+//	runtimeOnly 'org.slf4j:slf4j-jdk-platform-logging:2.0.4'
+//	runtimeOnly 'org.slf4j:slf4j-simple:2.0.4'
 
 	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"

@@ -36,11 +36,15 @@
 
 package tuwien.auto.calimero.server.knxnetip;
 
+import static java.lang.System.Logger.Level.ERROR;
+import static java.lang.System.Logger.Level.INFO;
+import static java.lang.System.Logger.Level.WARNING;
 import static tuwien.auto.calimero.device.ios.InterfaceObject.DEVICE_OBJECT;
 import static tuwien.auto.calimero.device.ios.InterfaceObject.KNXNETIP_PARAMETER_OBJECT;
 import static tuwien.auto.calimero.knxnetip.KNXnetIPRouting.DefaultMulticast;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.System.Logger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -61,8 +65,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import org.slf4j.Logger;
 
 import tuwien.auto.calimero.CloseEvent;
 import tuwien.auto.calimero.DeviceDescriptor.DD0;
@@ -329,7 +331,7 @@ public class KNXnetIPServer
 		}
 
 		private void setSbcRoutingMode(final int objectIndex, final int info) {
-			logger.info("{} IP system broadcast routing mode", info == 1 ? "enable" : "disable");
+			logger.log(INFO, "{0} IP system broadcast routing mode", info == 1 ? "enable" : "disable");
 			ios.setProperty(objectIndex, pidIpSbcControl, 1, 1, (byte) info);
 		}
 
@@ -357,7 +359,7 @@ public class KNXnetIPServer
 		ios = device.getInterfaceObjectServer();
 		listeners = new EventListeners<>(logger);
 
-		logger.info("{} v{}", friendlyName, Settings.getLibraryVersion());
+		logger.log(INFO, "{0} v{1}", friendlyName, Settings.getLibraryVersion());
 
 		ios.addServerListener(this::onPropertyValueChanged);
 
@@ -391,7 +393,7 @@ public class KNXnetIPServer
 	public final synchronized boolean addServiceContainer(final ServiceContainer sc)
 	{
 		if (findContainer(sc.getName()) != null) {
-			logger.warn("service container \"" + sc.getName() + "\" already exists in server");
+			logger.log(WARNING, "service container \"" + sc.getName() + "\" already exists in server");
 			return false;
 		}
 
@@ -566,7 +568,7 @@ public class KNXnetIPServer
 		if (OPTION_OUTGOING_INTERFACE.equals(optionKey)) {
 			return join(outgoingIf, NetworkInterface::getName, ",");
 		}
-		logger.warn("option \"" + optionKey + "\" not supported or unknown");
+		logger.log(WARNING, "option \"" + optionKey + "\" not supported or unknown");
 		throw new KNXIllegalArgumentException("unknown KNXnet/IP server option " + optionKey);
 	}
 
@@ -594,7 +596,7 @@ public class KNXnetIPServer
 			outgoingIf = parseNetworkInterfaces(optionKey, value);
 		}
 		else
-			logger.warn("option \"" + optionKey + "\" not supported or unknown");
+			logger.log(WARNING, "option \"" + optionKey + "\" not supported or unknown");
 	}
 
 	public void configureSecurity(final ServiceContainer sc, final Map<String, byte[]> keys,
@@ -731,10 +733,10 @@ public class KNXnetIPServer
 			final NetworkInterface nif = NetworkInterface.getByName(ifname);
 			if (nif != null)
 				return nif;
-			logger.error("option " + option + ": no network interface with name '" + ifname + "'");
+			logger.log(ERROR, "option " + option + ": no network interface with name '" + ifname + "'");
 		}
 		catch (final SocketException e) {
-			logger.error("option " + option + " for interface " + ifname, e);
+			logger.log(ERROR, "option " + option + " for interface " + ifname, e);
 		}
 		return null;
 	}
@@ -843,7 +845,7 @@ public class KNXnetIPServer
 			routingService.get().sendRoutingLostMessage(lost, state);
 		}
 		catch (final KNXConnectionClosedException e) {
-			logger.error("sending routing lost message notification", e);
+			logger.log(ERROR, "sending routing lost message notification", e);
 		}
 	}
 
